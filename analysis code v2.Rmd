@@ -1,16 +1,11 @@
 ---
-title: "Analyses for Spoken Word Processing in Bilingual Older Adults: Assessing Within- and Cross-Language Competition using the Visual World Task" 
+title: "Analyses for 'Spoken Word Processing in Bilingual Older Adults: Assessing Within- and Cross-Language Competition using the Visual World Task'" 
 output:
  html_document:
   df_print: paged
  word_document: default
 ---
 
-<style>
- .main-container {
-  max-width: 1200px !important;
- }
-</style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -18,10 +13,11 @@ options(width=120)
 
 library(data.table)
 library(lme4)
+library(lmerTest)
 ```
 
 # Load and prepare data
-```{r include=FALSE}
+```{r echo=TRUE}
 # First window
 data_200_600 <- read.csv("data/data_200_600.csv",header=TRUE, encoding="UTF-8")
 
@@ -65,49 +61,127 @@ contrasts(data_200_1000$Group_Age) <- -1 * contr.sum(2)/2
 ```{r}
 mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_ED) * Group_Age + TRIAL_LABEL + WASI.Vocab.Scaled.Score +
              (1 + displayR | Participant) + (1 + displayR + Group_Age | set), 
-           data=data_200_600[data_200_600$word_heard == "T" & data_200_600$displayR != "zFD" & 
+           data = data_200_600[data_200_600$word_heard == "T" & data_200_600$displayR != "zFD" & 
                                data_200_600$displayR != "zEFD",], 
-           contrasts = list(displayR = contr.sum(2)/2))
+           contrasts = list(displayR = -1*contr.sum(2)/2))
 
 summary(mod)
+
+# Older alone
+mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_ED) + TRIAL_LABEL + WASI.Vocab.Scaled.Score +
+             (1 + displayR | Participant) + (1 | set), 
+           data = data_200_600[data_200_600$word_heard == "T" & data_200_600$displayR != "zFD" & 
+                               data_200_600$displayR != "zEFD" & data_200_600$Group_Age=="zO",], 
+           contrasts = list(displayR = -1*contr.sum(2)/2))
+
+summary(mod)
+
+# Younger alone
+mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_ED) + TRIAL_LABEL + WASI.Vocab.Scaled.Score +
+             (1  | Participant) + (1 | set), 
+           data = data_200_600[data_200_600$word_heard == "T" & data_200_600$displayR != "zFD" & 
+                               data_200_600$displayR != "zEFD" & data_200_600$Group_Age=="Y",], 
+           contrasts = list(displayR = -1*contr.sum(2)/2))
+
+summary(mod)
+
+
 ```
 
 ### 600 - 1000
 ```{r}
 mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_ED) * Group_Age + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
              (1 | Participant) + (1 + displayR + Group_Age | set), 
-           data=data_600_1000[data_600_1000$word_heard == "T" & data_600_1000$displayR != "zFD" &
+           data = data_600_1000[data_600_1000$word_heard == "T" & data_600_1000$displayR != "zFD" &
                                 data_600_1000$displayR != "zEFD",], 
-           contrasts = list(displayR = contr.sum(2)/2))
+           contrasts = list(displayR = -1*contr.sum(2)/2))
 
 summary(mod)
+
+# Older alone
+mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_ED) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 | Participant) + (1 + displayR | set), 
+           data = data_600_1000[data_600_1000$word_heard == "T" & data_600_1000$displayR != "zFD" &
+                                data_600_1000$displayR != "zEFD" & data_600_1000$Group_Age == "zO",], 
+           contrasts = list(displayR = -1*contr.sum(2)/2))
+
+summary(mod)
+
+# Younger alone
+mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_ED) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 | Participant) + (1 + displayR | set), 
+           data = data_600_1000[data_600_1000$word_heard == "T" & data_600_1000$displayR != "zFD" &
+                                data_600_1000$displayR != "zEFD" & data_600_1000$Group_Age == "Y",], 
+           contrasts = list(displayR = -1*contr.sum(2)/2))
+
+summary(mod)
+
+
 ```
 
 ## Fixations to within-language competitor pictures as a function of word heard (target vs. control), only when competitor displays were presented
 
 ### 200 - 600
 ```{r}
-mod = lmer(Eng_Comp.prop ~ word_heard * scale(prop_phondiv_T_ED) * Group_Age + WASI.Vocab.Scaled.Score + TRIAL_LABEL +
+mod = lmer(Eng_Comp.prop ~ word_heard * scale(prop_phondiv_T_ED) * Group_Age + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
              (1 | Participant) + (1 + word_heard + Group_Age | set), 
-           data=data_200_600[data_200_600$displayR == "zED",])
+           data = data_200_600[data_200_600$displayR == "zED",])
+
+summary(mod)
+
+
+mod = lmer(Eng_Comp.prop ~ word_heard * scale(prop_phondiv_T_ED) + TRIAL_LABEL +  WASI.Vocab.Scaled.Score + 
+             (1 | Participant) + (1 + word_heard | set), 
+           data = data_200_600[data_200_600$displayR == "zED" & data_200_600$Group_Age == "zO",])
+
+summary(mod)
+
+
+mod = lmer(Eng_Comp.prop ~ word_heard * scale(prop_phondiv_T_ED) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 | Participant) + (1 + word_heard | set), 
+           data = data_200_600[data_200_600$displayR == "zED" & data_200_600$Group_Age == "Y",])
 
 summary(mod)
 ```
 
 ### 600 - 1000
 ```{r}
-mod = lmer(Eng_Comp.prop ~ word_heard * scale(prop_phondiv_T_ED) * Group_Age + WASI.Vocab.Scaled.Score + TRIAL_LABEL +
+mod = lmer(Eng_Comp.prop ~ word_heard * scale(prop_phondiv_T_ED) * Group_Age + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
              (1 | Participant) + (1 + Group_Age | set), 
-           data=data_600_1000[data_600_1000$displayR == "zED"  ,])
+           data = data_600_1000[data_600_1000$displayR == "zED"  ,])
+
+summary(mod)
+
+mod = lmer(Eng_Comp.prop ~ word_heard * scale(prop_phondiv_T_ED) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 | Participant) + (1 | set), 
+           data = data_600_1000[data_600_1000$displayR == "zED"  & data_600_1000$Group_Age == "zO" ,])
+
+summary(mod)
+
+mod = lmer(Eng_Comp.prop ~ word_heard * scale(prop_phondiv_T_ED) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 | Participant) + (1 | set), 
+           data = data_600_1000[data_600_1000$displayR == "zED"  & data_600_1000$Group_Age == "Y" ,])
 
 summary(mod)
 ```
 
 ## Correct mouse clicks for within-language competitor-display trials as a function of word heard (target vs. control)
 ```{r}
-mod = lmer(Click.RT ~ word_heard * scale(prop_phondiv_T_ED) * Group_Age + TRIAL_LABEL +   WASI.Vocab.Scaled.Score +
+mod = lmer(Click.RT ~ word_heard * scale(prop_phondiv_T_ED) * Group_Age + TRIAL_LABEL + WASI.Vocab.Scaled.Score +
              (1 | Participant) +   (1 | set), 
            data = data_200_1000[data_200_1000$displayR == "zED",])
+
+summary(mod)
+
+mod = lmer(Click.RT ~ word_heard * scale(prop_phondiv_T_ED) + TRIAL_LABEL + WASI.Vocab.Scaled.Score +
+             (1 | Participant) +   (1 | set), 
+           data = data_200_1000[data_200_1000$displayR == "zED" & data_200_1000$Group_Age == "zO",])
+
+summary(mod)
+
+mod = lmer(Click.RT ~ word_heard * scale(prop_phondiv_T_ED) + TRIAL_LABEL + WASI.Vocab.Scaled.Score +
+             (1 | Participant) +   (1 | set), 
+           data = data_200_1000[data_200_1000$displayR == "zED" & data_200_1000$Group_Age == "Y",])
 
 summary(mod)
 ```
@@ -115,32 +189,34 @@ summary(mod)
 ## Interactions with English-language proficiency for older adults alone 
 ```{r}
 mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_ED) * scale(RT_Ratio_En_Fr_Liv_NonLiv) + TRIAL_LABEL +
-             WASI.Vocab.Scaled.Score + (1 |Participant) + (1|set), 
-           data=data_200_600[data_200_600$word_heard == "T" & data_200_600$displayR != "zFD" & 
+             WASI.Vocab.Scaled.Score + 
+             (1 |Participant) + (1|set), 
+           data = data_200_600[data_200_600$word_heard == "T" & data_200_600$displayR != "zFD" & 
                                data_200_600$displayR != "zEFD" & data_200_600$Group_Age == "zO",],
-           contrasts = list(displayR = contr.sum(2)/2))
+           contrasts = list(displayR = -1*contr.sum(2)/2))
 
 summary(mod)
 
 mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_ED) * scale(RT_Ratio_En_Fr_Liv_NonLiv) + TRIAL_LABEL +
-             WASI.Vocab.Scaled.Score + (1|Participant) + (1|set), 
+             WASI.Vocab.Scaled.Score + 
+             (1|Participant) + (1|set), 
            data = data_600_1000[data_600_1000$word_heard == "T" & data_600_1000$displayR != "zFD" &
                                 data_600_1000$displayR != "zEFD" & data_600_1000$Group_Age == "zO",],
-           contrasts = list(displayR = contr.sum(2)/2))
+           contrasts = list(displayR = -1*contr.sum(2)/2))
 
 summary(mod)
 
 #
 
 mod = lmer(Eng_Comp.prop ~ word_heard * scale(prop_phondiv_T_ED) * scale(RT_Ratio_En_Fr_Liv_NonLiv) +
-             WASI.Vocab.Scaled.Score + TRIAL_LABEL +
+             TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
              (1 | Participant) + (1 | set), 
            data = data_200_600[data_200_600$displayR == "zED" & data_200_600$Group_Age == "zO"  ,])
 
 summary(mod)
 
 mod = lmer(Eng_Comp.prop ~ word_heard * scale(prop_phondiv_T_ED) * scale(RT_Ratio_En_Fr_Liv_NonLiv) +
-             WASI.Vocab.Scaled.Score + TRIAL_LABEL + 
+            TRIAL_LABEL +  WASI.Vocab.Scaled.Score + 
              (1 | Participant) + (1 | set), 
            data = data_600_1000[data_600_1000$displayR == "zED" & data_600_1000$Group_Age == "zO"  ,],)
 
@@ -162,14 +238,22 @@ summary(mod)
 
 ### 200 - 600
 ```{r}
-mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_FD) * Group_Age + TRIAL_LABEL + WASI.Vocab.Scaled.Score + (1  |Participant) + (1 + displayR + Group_Age |set), data=data_200_600[data_200_600$word_heard == "T" & data_200_600$displayR != "zED" & data_200_600$displayR != "zEFD",], contrasts = list(displayR = contr.sum(2)/2))
+mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_FD) * Group_Age + TRIAL_LABEL + WASI.Vocab.Scaled.Score +
+             (1  |Participant) + (1 + displayR + Group_Age |set), 
+           data = data_200_600[data_200_600$word_heard == "T" & data_200_600$displayR != "zED" & 
+                                 data_200_600$displayR != "zEFD",], 
+           contrasts = list(displayR = -1*contr.sum(2)/2))
 
 summary(mod)
 ```
 
 ### 600 - 1000
 ```{r}
-mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_FD) * Group_Age + TRIAL_LABEL + WASI.Vocab.Scaled.Score + (1 |Participant) + (1 + displayR + Group_Age |set), data=data_600_1000[data_600_1000$word_heard == "T" & data_600_1000$displayR != "zED" & data_600_1000$displayR != "zEFD",], contrasts = list(displayR = contr.sum(2)/2))
+mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_FD) * Group_Age + TRIAL_LABEL + WASI.Vocab.Scaled.Score +
+             (1 |Participant) + (1 + displayR + Group_Age |set), 
+           data = data_600_1000[data_600_1000$word_heard == "T" & data_600_1000$displayR != "zED" &
+                                  data_600_1000$displayR != "zEFD",], 
+           contrasts = list(displayR = -1*contr.sum(2)/2))
 
 summary(mod)
 ```
@@ -178,21 +262,63 @@ summary(mod)
 
 ### 200 - 600
 ```{r}
-mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) * Group_Age + WASI.Vocab.Scaled.Score + TRIAL_LABEL + (1 |Participant) + (1 + word_heard + Group_Age |set), data=data_200_600[data_200_600$displayR == "zFD"  ,],)
+mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) * Group_Age + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 |Participant) + (1 + word_heard + Group_Age |set), 
+           data = data_200_600[data_200_600$displayR == "zFD",])
+
+summary(mod)
+
+mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 |Participant) + (1  |set), 
+           data = data_200_600[data_200_600$displayR == "zFD" & data_200_600$Group_Age == "zO",],)
+
+summary(mod)
+
+mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 |Participant) + (1 + word_heard |set), 
+           data = data_200_600[data_200_600$displayR == "zFD" & data_200_600$Group_Age == "Y",],)
 
 summary(mod)
 ```
 
 ### 600 - 1000
 ```{r}
-mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) * Group_Age + WASI.Vocab.Scaled.Score + TRIAL_LABEL + (1 + word_heard |Participant) + (1 + word_heard + Group_Age |set), data=data_600_1000[data_600_1000$displayR == "zFD"  ,],)
+mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) * Group_Age + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 + word_heard |Participant) + (1 + word_heard + Group_Age |set), 
+           data = data_600_1000[data_600_1000$displayR == "zFD",],)
+
+summary(mod)
+
+mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 + word_heard |Participant) + (1 + word_heard |set), 
+           data = data_600_1000[data_600_1000$displayR == "zFD" & data_600_1000$Group_Age == "zO",],)
+
+summary(mod)
+
+mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 + word_heard |Participant) + (1 + word_heard |set), 
+           data = data_600_1000[data_600_1000$displayR == "zFD" & data_600_1000$Group_Age == "Y",],)
 
 summary(mod)
 ```
 
 ## Correct mouse clicks for cross-language competitor-display trials as a function of word heard (target vs. control) 
 ```{r}
-mod = lmer(Click.RT ~ word_heard * scale(prop_phondiv_T_FD) * Group_Age + TRIAL_LABEL + WASI.Vocab.Scaled.Score + (1 + word_heard |Participant) + (1 + word_heard + Group_Age |set), data=data_200_1000[data_200_1000$displayR == "zFD"  ,],)
+mod = lmer(Click.RT ~ word_heard * scale(prop_phondiv_T_FD) * Group_Age + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 + word_heard |Participant) + (1 + word_heard + Group_Age | set), 
+           data = data_200_1000[data_200_1000$displayR == "zFD",],)
+
+summary(mod)
+
+mod = lmer(Click.RT ~ word_heard * scale(prop_phondiv_T_FD) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 + word_heard |Participant) + (1 + word_heard |set), 
+           data = data_200_1000[data_200_1000$displayR == "zFD" & data_200_1000$Group_Age == "zO",],)
+
+summary(mod)
+
+mod = lmer(Click.RT ~ word_heard * scale(prop_phondiv_T_FD) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 + word_heard |Participant) + (1 + word_heard |set), 
+           data = data_200_1000[data_200_1000$displayR == "zFD" & data_200_1000$Group_Age == "Y",],)
 
 summary(mod)
 ```
@@ -200,26 +326,43 @@ summary(mod)
 ## Interaction with English-language proficiency in older adults 
 ```{r}
 # 
-mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_FD) * scale(RT_Ratio_En_Fr_Liv_NonLiv) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + (1  |Participant) + (1 |set), data=data_200_600[data_200_600$Group_Age =="zO" & data_200_600$word_heard == "T" & data_200_600$displayR != "zED" & data_200_600$displayR != "zEFD",], contrasts = list(displayR = contr.sum(2)/2))
+mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_FD) * scale(RT_Ratio_En_Fr_Liv_NonLiv) + TRIAL_LABEL +
+             WASI.Vocab.Scaled.Score + 
+             (1  |Participant) + (1 |set), 
+           data = data_200_600[data_200_600$Group_Age =="zO" & data_200_600$word_heard == "T" & 
+                                 data_200_600$displayR != "zED" & data_200_600$displayR != "zEFD",], 
+           contrasts = list(displayR = -1*contr.sum(2)/2))
 
 summary(mod)
 
-mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_FD) * scale(RT_Ratio_En_Fr_Liv_NonLiv) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + (1 |Participant) + (1 | set), data=data_600_1000[data_600_1000$Group_Age =="zO" & data_600_1000$word_heard == "T" & data_600_1000$displayR != "zED" & data_600_1000$displayR != "zEFD",], contrasts = list(displayR = contr.sum(2)/2))
+mod = lmer(Target.prop ~ displayR * scale(prop_phondiv_T_FD) * scale(RT_Ratio_En_Fr_Liv_NonLiv) + TRIAL_LABEL +
+             WASI.Vocab.Scaled.Score + 
+             (1 |Participant) + (1 | set), 
+           data = data_600_1000[data_600_1000$Group_Age =="zO" & data_600_1000$word_heard == "T" & 
+                                  data_600_1000$displayR != "zED" & data_600_1000$displayR != "zEFD",], 
+           contrasts = list(displayR = -1*contr.sum(2)/2))
 
 summary(mod)
 
 
 # 
-mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) * scale(RT_Ratio_En_Fr_Liv_NonLiv) + WASI.Vocab.Scaled.Score + TRIAL_LABEL + (1 |Participant) + (1 |set), data=data_200_600[data_200_600$Group_Age =="zO" & data_200_600$displayR == "zFD"  ,],)
+mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) * scale(RT_Ratio_En_Fr_Liv_NonLiv) + TRIAL_LABEL +WASI.Vocab.Scaled.Score + 
+             (1 |Participant) + (1 |set), 
+           data = data_200_600[data_200_600$Group_Age =="zO" & data_200_600$displayR == "zFD"  ,],)
 
 summary(mod)
 
-mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) * scale(RT_Ratio_En_Fr_Liv_NonLiv) + WASI.Vocab.Scaled.Score + TRIAL_LABEL + (1 |Participant) + (1 |set), data=data_600_1000[data_600_1000$Group_Age =="zO" & data_600_1000$displayR == "zFD"  ,],)
+mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) * scale(RT_Ratio_En_Fr_Liv_NonLiv) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
+             (1 |Participant) + (1 |set), 
+           data = data_600_1000[data_600_1000$Group_Age =="zO" & data_600_1000$displayR == "zFD"  ,],)
 
 summary(mod)
 
 # 
-mod = lmer(Click.RT ~ word_heard * scale(prop_phondiv_T_FD) * scale(RT_Ratio_En_Fr_Liv_NonLiv) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + (1 |Participant) + (1 |set), data=data_200_1000[data_200_1000$Group_Age == "zO" & data_200_1000$displayR == "zFD"  ,],)
+mod = lmer(Click.RT ~ word_heard * scale(prop_phondiv_T_FD) * scale(RT_Ratio_En_Fr_Liv_NonLiv) + TRIAL_LABEL +
+             WASI.Vocab.Scaled.Score + 
+             (1 |Participant) + (1 |set), 
+           data = data_200_1000[data_200_1000$Group_Age == "zO" & data_200_1000$displayR == "zFD"  ,],)
 
 summary(mod)
 ```
