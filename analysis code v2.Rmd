@@ -14,6 +14,11 @@ options(width=120)
 library(data.table)
 library(lme4)
 library(lmerTest)
+library(effects)
+library(ggplot2)
+
+#devtools::install_github("crsh/papaja")
+library(papaja)
 ```
 
 # Load and prepare data
@@ -152,6 +157,8 @@ mod = lmer(Eng_Comp.prop ~ word_heard * scale(prop_phondiv_T_ED) * Group_Age + T
 
 summary(mod)
 
+figure3.mod <- mod
+
 mod = lmer(Eng_Comp.prop ~ word_heard * scale(prop_phondiv_T_ED) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
              (1 | Participant) + (1 | set), 
            data = data_600_1000[data_600_1000$displayR == "zED"  & data_600_1000$Group_Age == "zO" ,])
@@ -163,6 +170,33 @@ mod = lmer(Eng_Comp.prop ~ word_heard * scale(prop_phondiv_T_ED) + TRIAL_LABEL +
            data = data_600_1000[data_600_1000$displayR == "zED"  & data_600_1000$Group_Age == "Y" ,])
 
 summary(mod)
+```
+
+
+### Plot Figure 3
+```{r}
+ef <- data.frame(Effect(c("Group_Age", "word_heard", "prop_phondiv_T_ED"), 
+                        figure3.mod, confidence.level = .6827,
+                        fixed.predictors = list(given.values = c(WASI.Vocab.Scaled.Score = 13.56, 
+                                                                 TRIAL_LABEL = 85))))
+                        # median trial and mean wasi score of the sample
+
+group_age_names <- c(
+  "Y"  = "Younger adults",
+  "zO" = "Older adults"
+)
+
+ggplot(ef, aes(x = prop_phondiv_T_ED, y = fit, group = word_heard, linetype = word_heard, 
+               ymin = lower, ymax = upper)) + 
+  geom_line() + geom_ribbon(alpha = .2) + 
+  facet_wrap( ~ Group_Age, labeller = as_labeller(group_age_names)) + 
+  coord_cartesian(ylim = c(0,.3)) +
+  labs(x = "Propotion phonological overlap",
+       y = "Model-predicted\nfixation proportion to competitor",
+       linetype = "Word heard") +
+  scale_linetype(labels = c("Control", "Target")) +
+  theme_apa(base_size = 14)
+ggsave("figures/figure_3.png", width = 15, height = 9, units = "cm")
 ```
 
 ## Correct mouse clicks for within-language competitor-display trials as a function of word heard (target vs. control)
@@ -289,6 +323,8 @@ mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) * Group_Age + TR
 
 summary(mod)
 
+figure5.mod <- mod
+
 mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) + TRIAL_LABEL + WASI.Vocab.Scaled.Score + 
              (1 + word_heard |Participant) + (1 + word_heard |set), 
            data = data_600_1000[data_600_1000$displayR == "zFD" & data_600_1000$Group_Age == "zO",],)
@@ -300,6 +336,31 @@ mod = lmer(Fr_Comp.prop ~ word_heard * scale(prop_phondiv_T_FD) + TRIAL_LABEL + 
            data = data_600_1000[data_600_1000$displayR == "zFD" & data_600_1000$Group_Age == "Y",],)
 
 summary(mod)
+```
+
+### Plot Figure 5
+```{r}
+ef <- data.frame(Effect(c("Group_Age", "word_heard", "prop_phondiv_T_FD"), 
+                        figure5.mod, confidence.level = .6827,
+                        fixed.predictors=list(given.values = c(WASI.Vocab.Scaled.Score = 13.56, TRIAL_LABEL = 85))))
+                        # median trial and mean wasi score of the sample
+
+group_age_names <- c(
+  "Y"  = "Younger adults",
+  "zO" = "Older adults"
+)
+
+ggplot(ef, aes(x = prop_phondiv_T_FD, y = fit, group = word_heard, 
+               linetype = word_heard, ymin = lower, ymax = upper)) + 
+  geom_line() + geom_ribbon(alpha = .2) + 
+  facet_wrap(~ Group_Age, labeller = as_labeller(group_age_names)) + 
+  coord_cartesian(ylim = c(0, .3)) +
+  labs(x = "Propotion phonological overlap",
+       y = "Model-predicted\nfixation proportion to competitor",
+       linetype = "Word heard") +
+  scale_linetype(labels=c("Control", "Target")) +
+  theme_apa(base_size = 14)
+ggsave("figures/figure_5.png", width = 15, height = 9, units = "cm")
 ```
 
 ## Correct mouse clicks for cross-language competitor-display trials as a function of word heard (target vs. control) 
