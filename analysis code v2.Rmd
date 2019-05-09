@@ -191,7 +191,7 @@ ggplot(ef, aes(x = prop_phondiv_T_ED, y = fit, group = word_heard, linetype = wo
   geom_line() + geom_ribbon(alpha = .2) + 
   facet_wrap( ~ Group_Age, labeller = as_labeller(group_age_names)) + 
   coord_cartesian(ylim = c(0,.3)) +
-  labs(x = "Propotion phonological overlap",
+  labs(x = "Proportion phonological overlap",
        y = "Model-predicted\nfixation proportion to competitor",
        linetype = "Word heard") +
   scale_linetype(labels = c("Control", "Target")) +
@@ -355,7 +355,7 @@ ggplot(ef, aes(x = prop_phondiv_T_FD, y = fit, group = word_heard,
   geom_line() + geom_ribbon(alpha = .2) + 
   facet_wrap(~ Group_Age, labeller = as_labeller(group_age_names)) + 
   coord_cartesian(ylim = c(0, .3)) +
-  labs(x = "Propotion phonological overlap",
+  labs(x = "Proportion phonological overlap",
        y = "Model-predicted\nfixation proportion to competitor",
        linetype = "Word heard") +
   scale_linetype(labels=c("Control", "Target")) +
